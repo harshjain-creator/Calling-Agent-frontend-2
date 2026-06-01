@@ -50,7 +50,7 @@ export default function Typewriter({
 
   return (
     <span
-      className={`inline-grid whitespace-nowrap pb-[0.15em] ${className}`}
+      className={`inline-grid max-w-full whitespace-normal lg:whitespace-nowrap pb-[0.15em] ${className}`}
       style={{ gridTemplateAreas: '"a"', gridTemplateColumns: 'auto', lineHeight: 1.2 }}
     >
       {/* placeholder reserves width = longest phrase */}

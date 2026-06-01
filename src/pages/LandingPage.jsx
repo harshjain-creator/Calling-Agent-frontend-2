@@ -56,9 +56,10 @@ export default function LandingPage() {
               Voice AI by {COMPANY.name}
             </span>
 
-            {/* Two-line hero — line 1 bold solid, line 2 gradient typewriter (fixed width prevents reflow) */}
+            {/* Two-line hero — line 1 bold solid, line 2 gradient typewriter.
+                Wraps on mobile; stays single-line on desktop (lg+, unchanged). */}
             <h1 className="font-display text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight leading-[1.12]">
-              <span className="block whitespace-nowrap text-[var(--color-fg)]">The AI-Powered voice layer for</span>
+              <span className="block whitespace-normal lg:whitespace-nowrap break-words text-[var(--color-fg)]">The AI-Powered voice layer for</span>
               <span className="block mb-6 text-gradient-shimmer">
                 <Typewriter phrases={HERO_PHRASES} />
               </span>

@@ -129,7 +129,7 @@ export default function DemoCallForm({ onSuccess } = {}) {
         <Label htmlFor="dm-phone">Phone number (with country code)</Label>
         <div className="relative">
           <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-[var(--color-fg-subtle)]" />
-          <Input id="dm-phone" type="tel" placeholder="+91 98765 43210" value={phone} onChange={e => setPhone(e.target.value)} required className="pl-10" />
+          <Input id="dm-phone" type="tel" placeholder="+61 412 345 678" value={phone} onChange={e => setPhone(e.target.value)} required className="pl-10" />
         </div>
       </div>
 
