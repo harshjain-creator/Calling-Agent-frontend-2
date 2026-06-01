@@ -9,7 +9,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-[var(--color-accent)] text-white shadow-lg shadow-[var(--color-accent-soft)] hover:bg-[var(--color-accent-strong)] hover:shadow-xl active:scale-[0.98]",
+          "bg-[var(--color-accent)] text-[var(--color-accent-fg)] shadow-lg shadow-[var(--color-accent-soft)] hover:bg-[var(--color-accent-strong)] hover:shadow-xl active:scale-[0.98]",
         gradient:
           "text-white shadow-xl bg-[length:200%_100%] bg-[linear-gradient(90deg,var(--gradient-1),var(--gradient-2),var(--gradient-3))] hover:bg-[position:100%_0] transition-[background-position] duration-500 active:scale-[0.98]",
         outline:

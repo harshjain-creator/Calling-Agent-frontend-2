@@ -92,7 +92,7 @@ export default function LandingPage() {
       {/* ── Feature bento ─────────────────────────────────────────────── */}
       <section id="features" className="relative w-full px-4 sm:px-6 py-20 lg:py-28 scroll-mt-20">
         <div className="text-center mx-auto max-w-2xl mb-14">
-          <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">
             Built for the next generation of enterprise.
           </h2>
           <p className="mt-4 text-base lg:text-lg text-[var(--color-fg-muted)] leading-relaxed">
@@ -156,7 +156,7 @@ export default function LandingPage() {
 
           <div className="relative">
             <Zap className="size-10 mx-auto mb-4 text-[var(--color-accent)]" />
-            <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight">
+            <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">
               Hear it before you buy it.
             </h2>
             <p className="mt-3 text-base lg:text-lg text-[var(--color-fg-muted)] max-w-xl mx-auto">

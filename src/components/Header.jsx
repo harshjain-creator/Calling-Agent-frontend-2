@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { LogIn, LogOut, User2 } from 'lucide-react'
+import { LogIn, LogOut, User2, Menu } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 import { Button } from '@/components/ui/button'
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet'
 import Logo from '@/components/Logo'
 import ThemeToggle from '@/components/ThemeToggle'
 import LoginModal from '@/components/LoginModal'
@@ -11,12 +12,13 @@ import { useAuth } from '@/contexts/AuthContext'
 import { COMPANY, NAV_LINKS, CLIENT_NAV_LINKS, SUPER_NAV_LINKS } from '@/config'
 import { confirm as swalConfirm, toast } from '@/lib/swal'
 
-function NavItem({ item }) {
+function NavItem({ item, onNavigate }) {
   const navigate = useNavigate()
   const { to, label, hash } = item
 
   // Hash links scroll to a landing section (navigating home first if needed).
   const handleClick = (e) => {
+    onNavigate?.()
     if (!hash) return
     e.preventDefault()
     const scrollTo = () => document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth' })
@@ -54,11 +56,14 @@ function NavItem({ item }) {
 }
 
 /**
- * Minimal header — logo only on the left, theme toggle + login/dashboard on
- * the right. No nav menu (removed by request). Mobile + desktop identical.
+ * Header — fixed, full-width, pinned to top. 64px tall, content capped at
+ * 1280px and centered. Frosted glass with a bottom border. Logo left (40px),
+ * desktop nav + always-visible theme toggle + login on the right. Mobile shows
+ * a hamburger that opens a slide-in drawer from the left.
  */
 export default function Header() {
   const [loginOpen, setLoginOpen] = useState(false)
+  const [menuOpen, setMenuOpen]   = useState(false)
   const { isAuthed, role, user, logout } = useAuth()
   const navigate = useNavigate()
 
@@ -80,40 +85,78 @@ export default function Header() {
     navigate('/')
   }
 
+  const AuthAction = ({ onClick }) =>
+    isAuthed ? (
+      <Button variant="ghost" size="sm" onClick={() => { onClick?.(); handleLogout() }}>
+        <LogOut className="size-4" />
+        Logout
+      </Button>
+    ) : (
+      <Button variant="gradient" size="sm" onClick={() => { onClick?.(); setLoginOpen(true) }}>
+        <LogIn className="size-4" />
+        Login
+      </Button>
+    )
+
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-40 glass border-b border-[var(--color-border)]">
-        <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6">
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6">
+          {/* Mobile hamburger — left, opens drawer from the left */}
+          <div className="lg:hidden">
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full" aria-label="Open menu">
+                  <Menu className="size-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="flex flex-col gap-6">
+                <Link
+                  to="/"
+                  onClick={() => setMenuOpen(false)}
+                  className="inline-flex items-center"
+                  aria-label={COMPANY.name}
+                >
+                  <Logo className="h-8 w-auto object-contain" />
+                </Link>
+
+                <nav className="flex flex-col gap-1">
+                  {activeNavLinks.map(l => (
+                    <NavItem key={l.label} item={l} onNavigate={() => setMenuOpen(false)} />
+                  ))}
+                </nav>
+
+                <div className="mt-auto border-t border-[var(--color-border)] pt-5">
+                  <SheetClose asChild>
+                    <span><AuthAction onClick={() => setMenuOpen(false)} /></span>
+                  </SheetClose>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+
           {/* Logo */}
           <Link to="/" className="group inline-flex items-center" aria-label={COMPANY.name}>
-            <Logo className="h-9 sm:h-10 w-auto object-contain group-hover:scale-[1.04] transition-transform" />
+            <Logo className="h-10 w-auto object-contain group-hover:scale-[1.04] transition-transform" />
           </Link>
 
-          {/* Center nav — role-aware */}
-          <nav className="hidden md:flex items-center gap-1">
+          {/* Desktop nav — role-aware */}
+          <nav className="hidden lg:flex items-center gap-1">
             {activeNavLinks.map(l => <NavItem key={l.label} item={l} />)}
           </nav>
 
-          {/* Right actions */}
+          {/* Right actions — theme toggle always visible */}
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            {isAuthed ? (
-              <>
-                <span className="hidden lg:flex items-center gap-1.5 px-2 text-xs text-[var(--color-fg-muted)]">
-                  <User2 className="size-3.5" />
-                  {user?.email}
-                </span>
-                <Button variant="ghost" size="sm" onClick={handleLogout}>
-                  <LogOut className="size-4" />
-                  <span className="hidden sm:inline">Logout</span>
-                </Button>
-              </>
-            ) : (
-              <Button variant="gradient" size="sm" onClick={() => setLoginOpen(true)}>
-                <LogIn className="size-4" />
-                <span className="hidden sm:inline">Login</span>
-              </Button>
+            {isAuthed && (
+              <span className="hidden lg:flex items-center gap-1.5 px-2 text-xs text-[var(--color-fg-muted)]">
+                <User2 className="size-3.5" />
+                {user?.email}
+              </span>
             )}
+            <div className="hidden lg:block">
+              <AuthAction />
+            </div>
           </div>
         </div>
       </header>
