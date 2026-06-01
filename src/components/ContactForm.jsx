@@ -20,6 +20,9 @@ const EMAILJS = {
   templateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || '',
   publicKey:  import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '',
 }
+// Recipients managed from .env. Set EmailJS template "To Email" = {{to_email}}.
+const CONTACT_TO_EMAILS  = import.meta.env.VITE_CONTACT_TO_EMAILS  || ''
+const CONTACT_FROM_EMAIL = import.meta.env.VITE_CONTACT_FROM_EMAIL || ''
 
 const DEFAULT_COUNTRY = COUNTRIES.find(c => c.iso2 === 'IN') || COUNTRIES[0]
 
@@ -90,6 +93,8 @@ export default function ContactForm({ onSuccess } = {}) {
             country_code: country.dial,
             phone:        fullPhone,
             message:      message.trim() || '—',
+            to_email:     CONTACT_TO_EMAILS,
+            from_email:   CONTACT_FROM_EMAIL,
           },
           { publicKey: EMAILJS.publicKey },
         )
