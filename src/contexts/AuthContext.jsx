@@ -14,9 +14,12 @@ export function AuthProvider({ children }) {
   const [user,    setUser]    = useState(() => tokenStore.user)
   const [loading, setLoading] = useState(false)
 
-  // Re-verify session on mount — /auth/me succeeds if httpOnly access cookie
-  // is valid; else apiFetch transparently calls /auth/refresh (cookie-based).
+  // Re-verify session on mount ONLY if we have a persisted user (i.e. they
+  // logged in before). Anonymous visitors have no cookie → probing /auth/me
+  // just yields a 401 the browser logs as a console error. Skipping the probe
+  // keeps the public site's console clean.
   useEffect(() => {
+    if (!tokenStore.user) return
     let cancelled = false
     apiFetch('/auth/me')
       .then(me => { if (!cancelled) { setUser(me); tokenStore.save({ user: me }) } })

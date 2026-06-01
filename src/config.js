@@ -10,7 +10,7 @@ export const NAV_LINKS = [
   { label: 'Home',          to: '/' },
   { label: 'Features',      to: '/', hash: 'features' },
   { label: 'Run Simulator', to: '/simulator' },
-  { label: 'Demo Call',     to: '/', hash: 'cta' },
+  { label: 'Contact Us',    to: '/', hash: 'contact' },
 ]
 
 // Client admin nav — visible after login when role=client_admin

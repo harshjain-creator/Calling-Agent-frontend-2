@@ -8,8 +8,9 @@ import {
 
 import Typewriter from '@/components/Typewriter'
 import DemoCallModal from '@/components/DemoCallModal'
+import ContactForm from '@/components/ContactForm'
 import { Button } from '@/components/ui/button'
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { COMPANY } from '@/config'
 
 const HERO_PHRASES = [
@@ -141,32 +142,29 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── CTA strip ─────────────────────────────────────────────────── */}
-      <section id="cta" className="relative w-full px-4 sm:px-6 py-20 scroll-mt-20">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.5, type: 'spring', stiffness: 200, damping: 24 }}
-          className="relative overflow-hidden rounded-3xl glass-strong p-12 lg:p-20 text-center max-w-7xl mx-auto"
-        >
-          <div className="absolute -top-20 -right-20 size-80 rounded-full bg-[var(--color-accent)] opacity-20 blur-3xl animate-blob-slow" />
-          <div className="absolute -bottom-24 -left-20 size-96 rounded-full opacity-20 blur-3xl animate-blob"
-               style={{ background: 'var(--gradient-2)' }} />
+      {/* ── Contact Us ────────────────────────────────────────────────── */}
+      <section id="contact" className="relative w-full px-4 sm:px-6 py-20 lg:py-28 scroll-mt-20">
+        <div className="text-center mx-auto max-w-2xl mb-12">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">
+            Contact Us
+          </h2>
+          <p className="mt-4 text-base lg:text-lg text-[var(--color-fg-muted)] leading-relaxed">
+            Tell us what you need — our team will get back to you shortly.
+          </p>
+        </div>
 
-          <div className="relative">
-            <Zap className="size-10 mx-auto mb-4 text-[var(--color-accent)]" />
-            <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">
-              Hear it before you buy it.
-            </h2>
-            <p className="mt-3 text-base lg:text-lg text-[var(--color-fg-muted)] max-w-xl mx-auto">
-              One form, one phone number. We'll call you back in under 10 seconds.
-            </p>
-            <Button variant="gradient" size="lg" onClick={() => setDemoOpen(true)} className="mt-7">
-              <MessageSquare className="size-4" />
-              Start a Demo Call
-            </Button>
-          </div>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto max-w-2xl"
+        >
+          <Card className="glass-strong shadow-2xl overflow-hidden">
+            <CardContent className="pt-7">
+              <ContactForm />
+            </CardContent>
+          </Card>
         </motion.div>
       </section>
 
