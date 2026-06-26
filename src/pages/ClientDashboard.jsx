@@ -2,20 +2,15 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
-  PhoneCall, Clock, IndianRupee, RefreshCw, Loader2, Upload, FileText, ChevronRight,
-  Sparkles, CalendarDays, BadgeCheck, Infinity as InfIcon,
+  PhoneCall, Clock, RefreshCw, Upload, FileText, ChevronRight,
 } from 'lucide-react'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { SkeletonCard, SkeletonList, SkeletonLine } from '@/components/ui/skeleton'
+import { SkeletonList, SkeletonLine } from '@/components/ui/skeleton'
 import { apiFetch } from '@/lib/api'
 import { useAuth } from '@/contexts/AuthContext'
 
-function INR(n) {
-  if (n == null) return '—'
-  return '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 2 })
-}
 function fmtDur(s) {
   if (s == null) return '—'
   const m = Math.floor(s / 60), sec = Math.floor(s % 60).toString().padStart(2, '0')
@@ -25,19 +20,14 @@ function fmtDur(s) {
 export default function ClientDashboard() {
   const { user } = useAuth()
   const [calls,       setCalls]       = useState([])
-  const [sub,         setSub]         = useState(null)   // { subscription, usage }
   const [loading,     setLoading]     = useState(true)
   const [err,         setErr]         = useState(null)
 
   async function load() {
     setLoading(true); setErr(null)
     try {
-      const [callsRes, subRes] = await Promise.all([
-        apiFetch('/admin/calls'),
-        apiFetch('/admin/subscription'),
-      ])
+      const callsRes = await apiFetch('/admin/calls')
       setCalls(Array.isArray(callsRes) ? callsRes : [])
-      setSub(subRes || null)
     } catch (e) {
       setErr(e?.body?.detail || e?.message || 'Failed to load')
     } finally {
@@ -47,8 +37,6 @@ export default function ClientDashboard() {
   useEffect(() => { load() }, [])
 
   const totalCalls = calls.length
-  // Client admin sees SPENT (selling) — never sees provider cost
-  const totalSpent = calls.reduce((acc, c) => acc + Number(c.total_sell_inr || 0), 0)
   const totalDur   = calls.reduce((acc, c) => acc + Number(c.duration_s || 0), 0)
   const interested = calls.filter(c => c.summary_json?.outcome === 'interested').length
 
@@ -67,13 +55,10 @@ export default function ClientDashboard() {
         </Button>
       </div>
 
-      {/* Subscription card */}
-      {loading && !sub ? <SkeletonCard /> : <SubscriptionCard sub={sub} />}
-
       {/* Stat cards */}
       {loading && calls.length === 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[0,1,2,3].map(i => (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {[0,1,2].map(i => (
             <Card key={i}><CardContent className="p-5 space-y-3">
               <SkeletonLine width="50%" height={12} />
               <SkeletonLine width="80%" height={28} />
@@ -81,11 +66,10 @@ export default function ClientDashboard() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <Stat label="Total Calls" value={totalCalls}            icon={PhoneCall} />
           <Stat label="Total Time"  value={fmtDur(totalDur)}      icon={Clock} />
           <Stat label="Interested"  value={interested}            icon={PhoneCall} />
-          <Stat label="Total Spent" value={INR(totalSpent)}       icon={IndianRupee} highlight />
         </div>
       )}
 
@@ -159,70 +143,6 @@ export default function ClientDashboard() {
         )}
       </div>
     </div>
-  )
-}
-
-function SubscriptionCard({ sub }) {
-  if (!sub || !sub.subscription) {
-    return (
-      <Card className="border-amber-500/40 bg-amber-500/5">
-        <CardContent className="pt-5 pb-5 flex items-start gap-3">
-          <Sparkles className="size-5 text-amber-500 mt-0.5" />
-          <div>
-            <p className="font-semibold">No active plan</p>
-            <p className="text-sm text-[var(--color-fg-muted)] mt-0.5">
-              Contact FI DIGITAL to activate a subscription before placing calls.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-  const s    = sub.subscription
-  const plan = s?.plans || {}
-  const u    = sub.usage || {}
-  const ends = s?.ends_at ? new Date(s.ends_at) : null
-  const daysLeft = ends ? Math.max(0, Math.ceil((ends - Date.now()) / (1000 * 60 * 60 * 24))) : null
-  const unlimited = u.calls_per_day_cap == null
-  return (
-    <Card className="border-[var(--color-accent)] shadow-md shadow-[var(--color-accent-soft)]">
-      <CardContent className="pt-5 pb-5">
-        <div className="flex items-start gap-4 flex-wrap">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--color-accent-soft)] text-[var(--color-accent)]">
-            <BadgeCheck className="size-5" />
-          </div>
-          <div className="flex-1 min-w-[220px]">
-            <p className="text-xs uppercase tracking-wider text-[var(--color-fg-subtle)]">Current Plan</p>
-            <p className="font-display text-2xl font-semibold mt-0.5">{plan.name}</p>
-            <p className="text-sm text-[var(--color-fg-muted)] mt-1">
-              ₹{Number(plan.rate_per_min_inr).toFixed(2)} / min ·{' '}
-              {unlimited
-                ? <span className="inline-flex items-center gap-1"><InfIcon className="size-3.5" /> unlimited</span>
-                : `${u.calls_per_day_cap} calls / day`}
-            </p>
-          </div>
-          {!unlimited && (
-            <div className="text-center">
-              <p className="text-xs uppercase tracking-wider text-[var(--color-fg-subtle)]">Calls Left Today</p>
-              <p className="font-display text-3xl font-bold text-[var(--color-accent)] mt-0.5">
-                {u.calls_remaining ?? '—'}
-                <span className="text-base text-[var(--color-fg-muted)] font-normal"> / {u.calls_per_day_cap}</span>
-              </p>
-            </div>
-          )}
-          {daysLeft != null && (
-            <div className="text-center">
-              <p className="text-xs uppercase tracking-wider text-[var(--color-fg-subtle)]">Days Left</p>
-              <p className="font-display text-3xl font-bold mt-0.5 flex items-center justify-center gap-1.5">
-                <CalendarDays className="size-5 text-[var(--color-accent)]" />
-                {daysLeft}
-              </p>
-              <p className="text-[10px] text-[var(--color-fg-subtle)]">until {ends.toLocaleDateString()}</p>
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
   )
 }
 

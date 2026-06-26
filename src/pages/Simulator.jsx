@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  PhoneCall, Phone, Clock, IndianRupee, RefreshCw, Upload, FileText, ChevronRight,
-  Sparkles, CalendarDays, BadgeCheck, Infinity as InfIcon, Users, BarChart3,
+  PhoneCall, Phone, Clock, RefreshCw, Upload, FileText, ChevronRight,
+  Sparkles, Users, BarChart3,
   Search, X, User, Mail, Plus, Lock, Globe2, Trash2, Play, CheckCircle2,
   ArrowLeft, Calendar, Hash, LayoutDashboard, Loader2, FlaskConical, Download, Volume2, Pause,
 } from 'lucide-react'
@@ -24,10 +24,6 @@ import SummaryCard from '@/components/SummaryCard'
    ─────────────────────────────────────────────────────────────────────────── */
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
-function INR(n) {
-  if (n == null) return '—'
-  return '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 2 })
-}
 function fmtDur(s) {
   if (s == null) return '—'
   const m = Math.floor(s / 60), sec = Math.floor(s % 60).toString().padStart(2, '0')
@@ -48,14 +44,6 @@ function fmtDate(iso) {
 const ago = (mins) => new Date(Date.now() - mins * 60000).toISOString()
 
 /* ── mock data ───────────────────────────────────────────────────────────── */
-const SUB = {
-  subscription: {
-    plans: { name: 'Growth', rate_per_min_inr: 12 },
-    ends_at: new Date(Date.now() + 22 * 86400000).toISOString(),
-  },
-  usage: { calls_per_day_cap: 30, calls_remaining: 18 },
-}
-
 const CALLS = [
   {
     id: 'demo-1', user: { name: 'Aarav Mehta', email: 'aarav@acmeco.com', phone: '+91 98200 11223' },
@@ -272,10 +260,6 @@ function DashboardView({ onOpenCall, onTab }) {
   const totalDur   = CALLS.reduce((a, c) => a + Number(c.duration_s || 0), 0)
   const interested = CALLS.filter(c => c.summary_json?.outcome === 'interested').length
 
-  const s = SUB.subscription, plan = s.plans, u = SUB.usage
-  const ends = new Date(s.ends_at)
-  const daysLeft = Math.max(0, Math.ceil((ends - Date.now()) / 86400000))
-
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -285,37 +269,6 @@ function DashboardView({ onOpenCall, onTab }) {
         </div>
         <Button variant="ghost" size="sm"><RefreshCw className="size-4" /> Refresh</Button>
       </div>
-
-      {/* Subscription */}
-      <Card className="border-[var(--color-accent)] shadow-md shadow-[var(--color-accent-soft)]">
-        <CardContent className="pt-5 pb-5">
-          <div className="flex items-start gap-4 flex-wrap">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--color-accent-soft)] text-[var(--color-accent)]">
-              <BadgeCheck className="size-5" />
-            </div>
-            <div className="flex-1 min-w-[220px]">
-              <p className="text-xs uppercase tracking-wider text-[var(--color-fg-subtle)]">Current Plan</p>
-              <p className="font-display text-2xl font-semibold mt-0.5">{plan.name}</p>
-              <p className="text-sm text-[var(--color-fg-muted)] mt-1">
-                ₹{plan.rate_per_min_inr.toFixed(2)} / min · {u.calls_per_day_cap} calls / day
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-xs uppercase tracking-wider text-[var(--color-fg-subtle)]">Calls Left Today</p>
-              <p className="font-display text-3xl font-bold text-[var(--color-accent)] mt-0.5">
-                {u.calls_remaining}<span className="text-base text-[var(--color-fg-muted)] font-normal"> / {u.calls_per_day_cap}</span>
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-xs uppercase tracking-wider text-[var(--color-fg-subtle)]">Days Left</p>
-              <p className="font-display text-3xl font-bold mt-0.5 flex items-center justify-center gap-1.5">
-                <CalendarDays className="size-5 text-[var(--color-accent)]" />{daysLeft}
-              </p>
-              <p className="text-[10px] text-[var(--color-fg-subtle)]">until {ends.toLocaleDateString()}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">

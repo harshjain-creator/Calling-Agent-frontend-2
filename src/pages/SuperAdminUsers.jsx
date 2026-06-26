@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   Plus, RefreshCw, Loader2, AlertCircle, User2, Building2, Trash2, Shield,
-  Sparkles,
 } from 'lucide-react'
 
 import { Card, CardContent } from '@/components/ui/card'
@@ -144,11 +143,11 @@ export default function SuperAdminUsers() {
         </div>
       )}
 
-      {/* Orgs section w/ Assign Plan */}
+      {/* Orgs section */}
       {orgs.length > 0 && (
         <div className="space-y-3">
           <h2 className="font-display text-xl font-semibold mt-4">Organisations</h2>
-          {orgs.map(o => <OrgPlanRow key={o.id} org={o} />)}
+          {orgs.map(o => <OrgRow key={o.id} org={o} />)}
         </div>
       )}
 
@@ -158,127 +157,18 @@ export default function SuperAdminUsers() {
   )
 }
 
-function OrgPlanRow({ org }) {
-  const [sub,    setSub]    = useState(null)
-  const [open,   setOpen]   = useState(false)
-  const [loading,setLoading]= useState(true)
-
-  async function loadSub() {
-    setLoading(true)
-    try {
-      const r = await apiFetch(`/superadmin/orgs/${org.id}/subscription`)
-      setSub(r?.subscription || null)
-    } catch { /* ignore */ }
-    finally { setLoading(false) }
-  }
-  useEffect(() => { loadSub() }, [org.id])
-
-  const plan = sub?.plans
-  const ends = sub?.ends_at ? new Date(sub.ends_at) : null
+function OrgRow({ org }) {
   return (
-    <>
-      <Card>
-        <CardContent className="pt-4 pb-4 flex items-center gap-4">
-          <div className="h-10 w-10 rounded-xl bg-[var(--color-accent-soft)] text-[var(--color-accent)] flex items-center justify-center">
-            <Building2 className="size-5" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold">{org.name}</p>
-            <p className="text-xs text-[var(--color-fg-subtle)] mt-0.5">
-              {loading
-                ? 'Loading plan…'
-                : plan
-                  ? <>Plan: <span className="text-[var(--color-fg)]">{plan.name}</span> · ₹{Number(plan.rate_per_min_inr).toFixed(2)}/min · {plan.calls_per_day ?? '∞'} calls/day · ends {ends?.toLocaleDateString()}</>
-                  : <span className="text-amber-500">No active plan</span>}
-            </p>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
-            <Sparkles className="size-4" /> Assign Plan
-          </Button>
-        </CardContent>
-      </Card>
-      <AssignPlanDialog open={open} onOpenChange={setOpen} org={org} onAssigned={loadSub} />
-    </>
-  )
-}
-
-function AssignPlanDialog({ open, onOpenChange, org, onAssigned }) {
-  const [plans,   setPlans]   = useState([])
-  const [planId,  setPlanId]  = useState('')
-  const [months,  setMonths]  = useState(1)
-  const [pending, setPending] = useState(false)
-  const [err,     setErr]     = useState(null)
-
-  useEffect(() => {
-    if (!open) return
-    apiFetch('/superadmin/plans')
-      .then(r => {
-        const list = (r?.plans || []).filter(p => p.is_active)
-        setPlans(list)
-        if (list[0]) setPlanId(list[0].id)
-      })
-      .catch(e => setErr(e?.body?.detail || e?.message))
-  }, [open])
-
-  async function submit(e) {
-    e.preventDefault()
-    setErr(null); setPending(true)
-    try {
-      await apiFetch(`/superadmin/orgs/${org.id}/subscription`, {
-        method: 'POST', body: { plan_id: planId, months: Number(months) },
-      })
-      onAssigned?.()
-      onOpenChange(false)
-    } catch (e) {
-      setErr(e?.body?.detail || e?.message || 'Failed')
-    } finally {
-      setPending(false)
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Assign Plan</DialogTitle>
-          <DialogDescription>{org.name} — replaces any active subscription.</DialogDescription>
-        </DialogHeader>
-        <form onSubmit={submit} className="space-y-4 mt-2">
-          <div className="space-y-1.5">
-            <Label>Plan</Label>
-            <Select value={planId} onChange={e => setPlanId(e.target.value)} required
-              className="w-full h-11 rounded-xl border border-[var(--color-border-strong)] bg-[var(--color-bg-elevated)] px-3 text-sm">
-              {plans.map(p => (
-                <option key={p.id} value={p.id}>
-                  {p.name} — ₹{Number(p.rate_per_min_inr).toFixed(2)}/min · {p.calls_per_day ?? '∞'}/day
-                </option>
-              ))}
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label>Duration (months)</Label>
-            <Select value={months} onChange={e => setMonths(Number(e.target.value))}
-              className="w-full h-11 rounded-xl border border-[var(--color-border-strong)] bg-[var(--color-bg-elevated)] px-3 text-sm">
-              <option value={1}>1 month</option>
-              <option value={3}>3 months</option>
-              <option value={6}>6 months</option>
-              <option value={12}>12 months</option>
-            </Select>
-          </div>
-          {err && (
-            <div className="flex items-start gap-2 rounded-lg bg-red-500/10 border border-red-500/30 px-3 py-2.5 text-sm text-red-500">
-              <AlertCircle className="size-4 mt-0.5 shrink-0" /><span>{String(err)}</span>
-            </div>
-          )}
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" variant="gradient" disabled={pending || !planId}>
-              {pending ? <><Loader2 className="size-4 animate-spin" /> Saving…</> : 'Assign'}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <Card>
+      <CardContent className="pt-4 pb-4 flex items-center gap-4">
+        <div className="h-10 w-10 rounded-xl bg-[var(--color-accent-soft)] text-[var(--color-accent)] flex items-center justify-center">
+          <Building2 className="size-5" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold">{org.name}</p>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

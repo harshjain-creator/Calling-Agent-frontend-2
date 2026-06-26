@@ -7,7 +7,6 @@ import RedirectIfAuthed   from '@/components/RedirectIfAuthed'
 import LandingPage  from '@/pages/LandingPage'
 import About        from '@/pages/About'
 import Services     from '@/pages/Services'
-import Pricing      from '@/pages/Pricing'
 import Contact      from '@/pages/Contact'
 import DemoForm     from '@/pages/DemoForm'
 
@@ -21,8 +20,6 @@ import ScenariosPage        from '@/pages/ScenariosPage'
 
 import SuperAdminDashboard  from '@/pages/SuperAdminDashboard'
 import SuperAdminUsers      from '@/pages/SuperAdminUsers'
-import SuperAdminCostRates  from '@/pages/SuperAdminCostRates'
-import SuperAdminPlans      from '@/pages/SuperAdminPlans'
 import SuperAdminInbound    from '@/pages/SuperAdminInbound'
 
 export default function App() {
@@ -38,7 +35,6 @@ export default function App() {
             <Route path="/"           element={<LandingPage />} />
             <Route path="/about"      element={<About />} />
             <Route path="/services"   element={<Services />} />
-            <Route path="/pricing"    element={<Pricing />} />
             <Route path="/contact"    element={<Contact />} />
             <Route path="/demo"       element={<DemoForm />} />
           </Route>
@@ -57,8 +53,6 @@ export default function App() {
           <Route element={<RequireAuth roles={['super_admin']} />}>
             <Route path="/superadmin"            element={<SuperAdminDashboard />} />
             <Route path="/superadmin/users"      element={<SuperAdminUsers />} />
-            <Route path="/superadmin/cost_rates" element={<SuperAdminCostRates />} />
-            <Route path="/superadmin/plans"      element={<SuperAdminPlans />} />
             <Route path="/superadmin/inbound"    element={<SuperAdminInbound />} />
           </Route>
         </Route>

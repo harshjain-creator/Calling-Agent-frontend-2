@@ -251,14 +251,6 @@ export default function AdminCalls() {
                             <span className="uppercase">{c.language_initial || '—'}</span>
                             {c.audio_mode    && <><span>·</span><span>{c.audio_mode}</span></>}
                             {c.recording_url && <><span>·</span><span className="text-emerald-500">recording</span></>}
-                            {isSuper && c.total_cost_inr != null && (
-                              <><span>·</span><span title="Cost (we pay)">Cost ₹{Number(c.total_cost_inr).toFixed(2)}</span></>
-                            )}
-                            {c.total_sell_inr != null && (
-                              <><span>·</span><span title="Selling (client pays)" className="text-[var(--color-accent)]">
-                                {isSuper ? 'Sell' : 'Spent'} ₹{Number(c.total_sell_inr).toFixed(2)}
-                              </span></>
-                            )}
                           </div>
                         </div>
                         <div className="flex flex-col items-end gap-1.5">

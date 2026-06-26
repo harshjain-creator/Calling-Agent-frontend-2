@@ -8,7 +8,6 @@ import { Card, CardContent } from '@/components/ui/card'
 import { SkeletonCard } from '@/components/ui/skeleton'
 import { useAuth } from '@/contexts/AuthContext'
 import { confirm as swalConfirm, toast, alertError } from '@/lib/swal'
-import { IndianRupee } from 'lucide-react'
 import AudioPlayer    from '@/components/AudioPlayer'
 import TranscriptView from '@/components/TranscriptView'
 import SummaryCard    from '@/components/SummaryCard'
@@ -18,11 +17,6 @@ import OutcomeBadge   from '@/components/OutcomeBadge'
 function fmtDate(iso) {
   if (!iso) return '—'
   try { return new Date(iso).toLocaleString() } catch { return iso }
-}
-
-function INR(n) {
-  if (n == null) return '—'
-  return '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 4 })
 }
 
 export default function AdminCallDetail() {
@@ -166,22 +160,6 @@ export default function AdminCallDetail() {
           }
         } : undefined}
       />
-      {/* Cost / Spent breakdown — role-aware */}
-      <Card>
-        <CardContent className="pt-6">
-          <h3 className="text-xs uppercase tracking-wider text-[var(--color-fg-subtle)] mb-3 flex items-center gap-2">
-            <IndianRupee className="size-3.5" /> {isSuper ? 'Cost & Selling Breakdown' : 'Amount Spent'}
-          </h3>
-          {isSuper ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <CostBreakdown title="Cost (provider)" prefix="cost" call={call} />
-              <SellingBreakdown call={call} />
-            </div>
-          ) : (
-            <ClientSpentBreakdown call={call} />
-          )}
-        </CardContent>
-      </Card>
 
       <MetricsBar call={call} />
 
@@ -189,76 +167,6 @@ export default function AdminCallDetail() {
         <SummaryCard summary={call.summary} summaryJson={call.summary_json} />
         <TranscriptView turns={turns} />
       </div>
-    </div>
-  )
-}
-
-function CostBreakdown({ title, prefix, call }) {
-  const rows = [
-    { label: 'Telephony', key: `telephony_${prefix}_inr` },
-    { label: 'STT',       key: `stt_${prefix}_inr` },
-    { label: 'LLM',       key: `llm_${prefix}_inr` },
-    { label: 'TTS',       key: `tts_${prefix}_inr` },
-  ]
-  return (
-    <div>
-      <p className="text-xs uppercase tracking-wider text-[var(--color-fg-subtle)] mb-2">{title}</p>
-      <ul className="space-y-1.5 text-sm">
-        {rows.map(r => (
-          <li key={r.key} className="flex justify-between">
-            <span className="text-[var(--color-fg-muted)]">{r.label}</span>
-            <span className="font-mono">{INR(call[r.key])}</span>
-          </li>
-        ))}
-        <li className="flex justify-between border-t border-[var(--color-border)] pt-1.5 mt-1">
-          <span className="font-medium">Total</span>
-          <span className="font-display font-bold text-[var(--color-accent)]">{INR(call[`total_${prefix}_inr`])}</span>
-        </li>
-      </ul>
-    </div>
-  )
-}
-
-function SellingBreakdown({ call }) {
-  // Plan-based selling: rate × minutes. Per-module sell columns intentionally 0.
-  const durS    = Number(call.duration_s || 0)
-  const minutes = durS / 60
-  const total   = Number(call.total_sell_inr || 0)
-  const ratePerMin = minutes > 0 ? total / minutes : null
-  const mm = Math.floor(durS / 60)
-  const ss = Math.floor(durS % 60).toString().padStart(2, '0')
-  return (
-    <div>
-      <p className="text-xs uppercase tracking-wider text-[var(--color-fg-subtle)] mb-2">Selling (client)</p>
-      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-muted)] p-3 mb-3">
-        <p className="text-xs text-[var(--color-fg-subtle)]">Plan rate × duration</p>
-        <p className="font-mono text-sm mt-1 text-[var(--color-fg)]">
-          {ratePerMin != null ? `${INR(ratePerMin)} / min` : '—'} × {mm}m {ss}s
-        </p>
-      </div>
-      <ul className="space-y-1.5 text-sm">
-        <li className="flex justify-between text-[var(--color-fg-subtle)] text-xs">
-          <span>Per-module breakdown</span>
-          <span className="italic">flat plan rate</span>
-        </li>
-        <li className="flex justify-between border-t border-[var(--color-border)] pt-1.5 mt-1">
-          <span className="font-medium">Total Billed</span>
-          <span className="font-display font-bold text-[var(--color-accent)]">{INR(total)}</span>
-        </li>
-      </ul>
-    </div>
-  )
-}
-
-function ClientSpentBreakdown({ call }) {
-  return (
-    <div className="flex items-center justify-between flex-wrap gap-3">
-      <p className="text-sm text-[var(--color-fg-muted)]">
-        Billed for this call (based on usage × your plan rates):
-      </p>
-      <p className="font-display text-2xl font-bold text-gradient-shimmer">
-        {INR(call.total_sell_inr)}
-      </p>
     </div>
   )
 }
